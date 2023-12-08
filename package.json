@@ -1,0 +1,28 @@
+{
+  "name": "invoice-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed": "node ./script/seed.js",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.0.1",
+    "next-auth": "^5.0.0-beta.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.1",
+    "pg": "^8.11.3",
+    "postcss": "^8",
+    "react-responsive": "^9.0.2",
+    "tailwindcss": "^3.3.0"
+  }
+}
