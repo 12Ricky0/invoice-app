@@ -25,7 +25,7 @@ export default async function Invoice({ query }) {
     if (!data || data.length === 0) {
         return (
             <div className="">
-                <Title total={`${data && data.length} ${data && data.length > 1 ? 'invoices' : 'invoice'}`} mtotal={`  ${data && data.length > 0 ? `There are ${data && data.length} total invoices` : 'No invoices'}`} />
+                <Title total={`${data && data.length} ${data && data.length > 1 ? 'invoices' : 'invoice'}`} mtotal={`  ${data && data.length > 0 ? `There are ${data && data.length} total invoices` : 'No invoices'}`} query={query} />
                 <div className="w-[240px] mt-[140px] mx-auto">
                     <Image
                         src="/assets/illustration-empty.svg"
@@ -49,7 +49,7 @@ export default async function Invoice({ query }) {
             <Title total={`${data && data.length} ${data && data.length > 1 ? 'invoices' : 'invoice'}`} mtotal={`  ${data && data.length > 0 ? `There are ${data.length} total invoices` : 'No invoices'}`} />
             {data && data.map(invoice =>
                 <Link key={invoice.id} href={`dashboard/invoice/${invoice.id}`}>
-                    <section className="hover:border cursor-pointer hover:border-primary-violet md:flex justify-between items-center mt-4 md:text-left rounded-lg h-[134px] md:h-[72px] w-[87%] lg:w-[50%] md:w-[90%] bg-white mx-auto dark:bg-primary-very-dark-blue">
+                    <section className="hover:border cursor-pointer hover:border-primary-violet md:flex justify-between items-center mt-4 md:text-left rounded-lg h-[134px] md:h-[72px] w-[87%] lg:w-[720px] md:w-[90%] bg-white mx-auto dark:bg-primary-very-dark-blue">
                         <article className="mx-6 pt-[25px] block md:hidden">
                             <div className="flex justify-between mb-5 ">
                                 <span className="text-secondary-greyish-blue font-medium">#<span className="text-secondary-black font-bold text-[15px] dark:text-white">{invoice.id.slice(1, 7).toUpperCase()}</span></span>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useFormStatus } from 'react-dom';
 import { deleteInvoice, updateInvoice } from "@/libs/actions";
+import { useRouter } from "next/navigation";
 
 
 export function DeleteButton({ id, action, refe }) {
@@ -25,6 +26,7 @@ export function DeleteButton({ id, action, refe }) {
 
 export function SubmitButton({ disabled }) {
     const { pending } = useFormStatus()
+    const router = useRouter()
 
     return (
         <div>

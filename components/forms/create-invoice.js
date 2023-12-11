@@ -112,7 +112,7 @@ export default function Form() {
     return (
         <div className="">
             <Overlay>
-                <form action={dispatch} className="caret-primary-violet ">
+                <form action={dispatch} className="caret-primary-violet cursor-pointer">
 
                     <div className="lg:w-[700px] md:w-[670px] md:ml-0 lg:ml-[80px] absolute bg-white overflow-y-auto dark:bg-tetiary-dark-russian md:rounded-r-[20px]">
                         <section className="mx-6 md:mx-[56px] lg:mr-[56px] lg:ml-[70px]">
@@ -222,7 +222,7 @@ export default function Form() {
 
                                 }
                             </fieldset>
-                            <button onClick={handleAddForm} className="text-secondary-greyish-blue font-bold text-[15px] border-none block w-[100%] bg-tetiary-light-gray py-4 rounded-[24px] dark:bg-primary-dark-blue" type="button">+ Add New Item</button>
+                            <button onClick={handleAddForm} className="text-secondary-greyish-blue hover:text-secondary-light-blue text-opacity-[1] hover:bg-secondary-light-greyish-blue cursor-pointer font-bold text-[15px] border-none block w-[100%] bg-tetiary-light-gray py-4 rounded-[24px] dark:bg-primary-dark-blue " type="button">+ Add New Item</button>
                             {/* {state && state.map(error =>
                                 <p aria-live="polite" key={error} className="text-tetiary-red text-[10px] font-semibold mt-[34px]">
                                     {error}

@@ -33,7 +33,7 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
                         className="inline-block mr-6 w-auto h-auto"
                     />
 
-                    <span className="text-secondary-greyish-blue mb-[31px] font-medium text-center text-[13px] dark:text-white">Go back</span>
+                    <span className="text-secondary-greyish-blue hover:text-secondary-light-blue dark:hover:text-secondary-greyish-blue mb-[31px] font-bold text-center text-[15px] dark:text-white">Go back</span>
 
                 </div>
             </Link>
@@ -82,7 +82,7 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
                         </article>
                         <article className="mt-[30px] md:mt-0 md:text-right">
                             <Suspense fallback="Loading...">
-                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].street}</p>
+                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0]?.street}</p>
                                 <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].city}</p>
                                 <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].post_code}</p>
                                 <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].country}</p>
@@ -107,17 +107,17 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
                                 <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Bill To</p>
                                 <Suspense fallback="Loading...">
                                     <h3 className="text-secondary-black font-bold text-[15px] dark:text-white my-[13px]">{invoice && invoice[0].client_name}</h3>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress && clientAddress[0].street}</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress && clientAddress[0].city}</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress && clientAddress[0].post_code}</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress && clientAddress[0].country}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.street}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.city}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.post_code}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.country}</p>
                                 </Suspense>
                             </article>
                         </div>
 
                         <div className="mx-6 md:mx-7 my-[32px]">
                             <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Sent To</p>
-                            <h3 className="text-secondary-black font-bold text-[15px] dark:text-white my-[13px]">{invoice && invoice[0].client_email}</h3>
+                            <h3 className="text-secondary-black font-bold text-[15px] dark:text-white my-[13px]">{invoice[0]?.client_email}</h3>
 
                         </div>
                     </div>
@@ -135,7 +135,7 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
                         )}
                         <article className="rounded-b-lg bg-primary-dark-blue dark:bg-secondary-black h-[80px] flex justify-between items-center mt-[23px]">
                             <p className="text-white font-medium text-[13px] ml-[24px]">Grand Total</p>
-                            <p className="text-white font-bold text-[24px] mr-[24px]">{items[0].sub_total}</p>
+                            <p className="text-white font-bold text-[24px] mr-[24px]">{items[0]?.sub_total}</p>
                         </article>
                     </div>
                     {/* Mobile Design */}
@@ -171,7 +171,7 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
 
                         <article className="rounded-b-lg bg-primary-dark-blue dark:bg-secondary-black h-[80px] flex justify-between items-center mt-[32px]">
                             <p className="text-white font-medium text-[13px] ml-[32px]">Amount Due</p>
-                            <p className="text-white font-bold text-[24px] mr-[32px]">{items[0].sub_total}</p>
+                            <p className="text-white font-bold text-[24px] mr-[32px]">{items[0]?.sub_total}</p>
                         </article>
                     </div>
 

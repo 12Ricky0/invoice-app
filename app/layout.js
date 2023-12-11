@@ -1,7 +1,6 @@
 import { League_Spartan } from 'next/font/google';
 import './globals.css';
 import ThemeProvider from '@/theme-provider';
-import Provider from '@/components/provider';
 
 
 const spartan = League_Spartan({ subsets: ['latin'], weight: ['700', '500'] })
@@ -16,10 +15,8 @@ export default function RootLayout(props) {
     <html lang="en">
       <body className={`${spartan.className} antialiased`}>
         <ThemeProvider>
-          <Provider>
-            {props.children}
-            {props.modal}
-          </Provider>
+          {props.children}
+          {props.modal}
         </ThemeProvider>
       </body>
     </html>

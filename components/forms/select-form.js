@@ -20,7 +20,7 @@ const CustomSelect = ({ onChange, term }) => {
 
 
     return (
-        <div className="h-[48px] px-4 w-[100%] mt-[9px] mb-[25px] font-bold text-[15px] text-secondary-black md:w-[240px] dark:text-white flex items-center justify-between border rounded-[4px] border-secondary-light-greyish-blue">
+        <div className="h-[48px] px-4 w-[100%] mt-[9px] mb-[25px] font-bold text-[15px] hover:border-primary-violet text-secondary-black md:w-[240px] dark:text-white flex items-center justify-between border rounded-[4px] border-secondary-light-greyish-blue">
             <div className="select-box" >
                 <span id="selected-option">{selectedOption}</span>
             </div>

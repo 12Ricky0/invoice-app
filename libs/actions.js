@@ -5,6 +5,7 @@ import { items } from "./placeholder_data";
 import validator from "validator";
 import { fetchTotalInvoice, fetchInvoice } from "./data";
 const pg = require('pg');
+import { auth } from "@/auth";
 
 const db = new pg.Client({
     user: "postgres",
@@ -15,7 +16,26 @@ const db = new pg.Client({
 });
 db.connect();
 
+export async function seedUser() {
+    const { user } = await auth() || {};
+
+    try {
+        await db.query(`
+                INSERT INTO users(name, email)
+                VALUES($1, $2)
+        `,
+            [user?.name, user?.email]
+        )
+
+    } catch (error) {
+        // console.error(error)
+        // throw new Error('Could not insert user into database')
+    }
+
+}
+
 export default async function createInvoice(prevState, formData) {
+
     const invoice = {
         clientName: formData.get('cName'),
         date: formData.get('date'),
@@ -84,9 +104,6 @@ export default async function createInvoice(prevState, formData) {
 
         }
     }
-    console.log(items.itemName.length)
-
-
 
     // await new Promise((resolve) => setTimeout(resolve, 3000));
 
@@ -140,10 +157,8 @@ export default async function createInvoice(prevState, formData) {
         throw new Error("Error Creating Invoice")
     }
 
-    // console.log((totalInvoice[totalInvoice.length - 1].invoice_ref) + 1)
-
     revalidatePath('/dashboard');
-    redirect('/dashboard',);
+    redirect('/dashboard/created');
 }
 
 export async function deleteInvoice(ref) {
@@ -277,14 +292,13 @@ export async function updateEditedInvoice(id, prevState, formData) {
             const price = items.price[i];
             const total = items.total[i];
 
-            db.query(`
-                UPDATE items
-                SET name = $2, quantity = $3, price = $4, total = $5
-                where invoice_ref = $1
-        `,
+            await db.query(`
+                    UPDATE items
+                    SET name = $2, quantity = $3, price = $4, total = $5
+                    where invoice_ref = $1
+            `,
                 [id, itemName, quantity, price, total]
             );
-
         }
 
         await db.query(`

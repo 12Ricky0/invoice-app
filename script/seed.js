@@ -10,6 +10,27 @@ const db = new pg.Client({
 });
 db.connect();
 
+async function createUsersTable() {
+
+    try {
+        const createUserTable = await db.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        user_id SERIAL PRIMARY KEY,
+        name VARCHAR(255) UNIQUE NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL
+      );
+    `);
+
+        console.log(`Created "user" table`);
+        return createUserTable
+
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+
+}
+
 async function seedInvoice(client) {
     try {
         await db.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
@@ -166,7 +187,7 @@ async function seedItems() {
 
 
 async function main() {
-
+    await createUsersTable();
     await seedInvoice();
     await seedSenderAddress();
     await seedClientAddress();

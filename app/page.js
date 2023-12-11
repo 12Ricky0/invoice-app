@@ -1,6 +1,11 @@
 import Image from "next/image";
 import Login from "@/components/login";
-export default function Home() {
+import { auth } from "@/auth";
+import { seedUser } from "@/libs/actions";
+
+export default async function Home() {
+  const { user } = await auth() || {};
+  user?.email && await seedUser()
 
   return (
     <main className="">
@@ -14,13 +19,17 @@ export default function Home() {
             className=""
           />
           <article className="mt-[42px] text-center">
-            <h1 className="text-secondary-black mb-[23px] font-bold text-[24px] dark:text-white">There is nothing here</h1>
-            <span className=" block md:hidden text-center text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Create a new invoice by clicking <b>New</b> button and get started </span>
-            <span className=" hidden md:block text-center text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Create a new invoice by clicking <b>New Invoice</b> button and get started </span>
+            <h1 className="text-secondary-black mb-[23px] font-bold text-[24px] dark:text-white">{user ? 'Signed In as' : 'Not Signed In'}</h1>
+            {user ?
+              <span className=" text-center text-secondary-greyish-blue font-medium text-[13px] dark:text-white"> <b>{user?.email}</b> </span>
+              :
+              <span className=" text-center text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Login by clicking <b>Sign in</b> button and get started </span>
+
+            }
           </article>
         </div>
       </div>
-      <Login />
+      <Login user={user} />
     </main>
   )
 }
