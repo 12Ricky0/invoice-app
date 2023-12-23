@@ -1,23 +1,27 @@
 import pg from 'pg';
 import { unstable_noStore as noStore } from "next/cache";
 import { revalidatePath } from "next/cache";
-const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 import { notFound } from 'next/navigation';
+import { auth } from "@/auth";
 
 
+
+const gbp = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' });
 
 const db = new pg.Client({
     user: "postgres",
     host: "localhost",
     database: "Invoice",
-    password: "Suretaste2",
+    password: process.env.PASSWORD,
     port: 5433,
 });
 db.connect();
 
+
 export async function fetchInvoice() {
     // Add noStore() here prevent the response from being cached.
     // This is equivalent to in fetch(..., {cache: 'no-store'}).
+    const { user } = await auth() || {};
     noStore();
     revalidatePath('/dashboard')
 
@@ -25,21 +29,42 @@ export async function fetchInvoice() {
 
         console.log("Fetching revenue data...");
         // await new Promise((resolve) => setTimeout(resolve, 3000));
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
 
         const data = await db.query(`
                 SELECT 
                 invoice.id,invoice.invoice_ref, client_name, payment_due, created_at, status, SUM(total) as total
                 FROM invoice
                 JOIN items ON invoice.invoice_ref=items.invoice_ref
+                where invoice.user_id = $1 OR NULL
                 GROUP BY invoice.invoice_ref
-                ORDER BY invoice_ref 
-        `);
+                ORDER BY payment_due 
+        `, [userId.rows[0].user_id]);
+        // const data2 = await db.query(`
+        // SELECT user_invoices.user_id, invoice.id, invoice.invoice_ref, invoice.status, 
+        // invoice.client_name, invoice.payment_due, invoice.created_at, SUM(items.total) as total
+        // FROM user_invoices
+        // JOIN invoice ON user_invoices.invoice_ref = invoice.invoice_ref
+        // JOIN items ON user_invoices.invoice_ref = items.invoice_ref
+        // WHERE user_invoices.user_id = $1
+        // GROUP BY user_invoices.user_id, invoice.id, invoice.invoice_ref
+        // ORDER BY payment_due        
+        // `, [userId.rows[0].user_id]);
         console.log("Data fetch complete after 3 seconds.");
 
         const invoice = data.rows.map((invoice) => ({
             ...invoice,
             total: gbp.format(invoice.total)
         }));
+        // const invoice2 = data2.rows.map((invoice) => ({
+        //     ...invoice,
+        //     total: gbp.format(invoice.total)
+        // }));
 
         return invoice;
 
@@ -50,17 +75,28 @@ export async function fetchInvoice() {
 
 }
 
+
 export async function fetchFilteredInvoice(query) {
+    const { user } = await auth() || {};
+
     try {
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
+
         const data = await db.query(`
-        SELECT 
-        invoice.id,invoice.invoice_ref, client_name, payment_due, created_at, status, SUM(total) as total
+SELECT
+invoice.id, invoice.invoice_ref, client_name, payment_due, created_at, status, SUM(total) as total
         FROM invoice
-        JOIN items ON invoice.invoice_ref=items.invoice_ref
-        WHERE invoice.status ILIKE $1
-        GROUP BY invoice.invoice_ref
-        ORDER BY invoice_ref
-        `, [query]);
+        JOIN items ON invoice.invoice_ref = items.invoice_ref
+        where invoice.user_id = $1
+        AND invoice.status ILIKE $2
+                GROUP BY invoice.invoice_ref
+        ORDER BY payment_due        
+        `, [userId.rows[0].user_id, query]);
 
         const invoice = data.rows.map((invoice) => ({
             ...invoice,
@@ -75,27 +111,44 @@ export async function fetchFilteredInvoice(query) {
 
 export async function fetchDetails(id) {
     noStore();
+    const { user } = await auth() || {};
 
     try {
-        const data = await db.query({
-            text: 'SELECT * FROM invoice WHERE id = $1',
-            values: [id],
-        });
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
+        const data = await db.query(`
+        SELECT * FROM invoice
+        WHERE invoice.user_id=$1  AND invoice.id=$2 
+        `, [userId.rows[0].user_id, id]);
+
         return data.rows;
+
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error(notFound());
     }
 }
 
-export async function fetchClientAddress(ref) {
+export async function fetchAddress(ref) {
     noStore();
+    const { user } = await auth() || {};
 
     try {
-        const data = await db.query({
-            text: 'SELECT * FROM client_address WHERE invoice_ref = $1',
-            values: [ref]
-        });
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
+        const data = await db.query(`
+        SELECT * FROM address
+        WHERE address.user_id=$1  AND address.invoice_ref=$2 
+        `, [userId.rows[0].user_id, ref]);
+
         return data.rows
 
     } catch (error) {
@@ -104,30 +157,46 @@ export async function fetchClientAddress(ref) {
     }
 }
 
-export async function fetchSenderAddress(ref) {
-    noStore();
+// export async function fetchSenderAddress(ref) {
+//     noStore();
+//     const { user } = await auth() || {};
 
-    try {
-        const data = await db.query({
-            text: 'SELECT * FROM sender_address WHERE invoice_ref = $1',
-            values: [ref]
-        });
+//     try {
+//         const userId = await db.query(`
+//         SELECT user_id
+//         FROM users
+//         WHERE email = $1
+//     `, [user?.email]);
 
-        return data.rows
-    } catch (error) {
-        console.error("Database Error:", error);
-        throw new Error("Failed to fetch sender address.");
-    }
-}
+//         const data = await db.query(`
+//         SELECT sender_address.* FROM user_invoices
+//         JOIN sender_address on sender_address.invoice_ref=user_invoices.invoice_ref
+//         WHERE (sender_address.user_id=$1 OR sender_address.user_id IS NULL) AND sender_address.invoice_ref=$2 
+//         `, [userId.rows[0].user_id, ref]);
+
+//         return data.rows
+//     } catch (error) {
+//         console.error("Database Error:", error);
+//         throw new Error("Failed to fetch sender address.");
+//     }
+// }
 
 export async function fetchItems(ref) {
     noStore();
+    const { user } = await auth() || {};
 
     try {
-        const data = await db.query({
-            text: 'SELECT * FROM items WHERE invoice_ref = $1',
-            values: [ref]
-        });
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
+        const data = await db.query(`
+        SELECT * FROM items
+        WHERE items.user_id = $1 AND items.invoice_ref=$2 
+        `, [userId.rows[0].user_id, ref]);
+
         var total = 0
         data.rows.forEach(data => total += Number(data.total))
         const invoice = data.rows.map((invoice) => ({
@@ -147,11 +216,20 @@ export async function fetchItems(ref) {
 
 export async function itemsToEdit(ref) {
     noStore();
+    const { user } = await auth() || {};
 
     try {
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
         const data = await db.query(`
-        SELECT * FROM items WHERE invoice_ref = $1
-        `, [ref]);
+        SELECT * FROM items
+        WHERE items.user_id = $1 AND items.invoice_ref=$2 
+        `, [userId.rows[0].user_id, ref]);
+
         return data.rows
     } catch (error) {
         console.error("Database Error:", error);
@@ -159,17 +237,17 @@ export async function itemsToEdit(ref) {
     }
 }
 
-export async function fetchTotalInvoice() {
+// export async function fetchTotalInvoice() {
 
-    try {
-        const data = await db.query(`
-        SELECT invoice_ref
-        FROM invoice
-        `);
+//     try {
+//         const data = await db.query(`
+//         SELECT invoice_ref
+//         FROM invoice
+//         `);
 
-        return data.rows
-    } catch (error) {
-        console.error("Database Error", error);
-        throw new Error("Failed to fetch total invoice")
-    }
-}
+//         return data.rows
+//     } catch (error) {
+//         console.error("Database Error", error);
+//         throw new Error("Failed to fetch total invoice")
+//     }
+// }

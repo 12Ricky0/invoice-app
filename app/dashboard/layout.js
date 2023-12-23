@@ -1,10 +1,13 @@
 import Header from "@/components/header";
+import { auth } from "@/auth";
 
 
-export default function DashboardLayout(props) {
+export default async function DashboardLayout(props) {
+    const { user } = await auth() || {};
+
     return (
         <main className="overflow-scroll">
-            <Header />
+            <Header dp={user?.image} />
             {props.children}
             {props.modal}
         </main>

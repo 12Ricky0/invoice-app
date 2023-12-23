@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 
-export default async function DetailInvoice({ invoice, clientAddress, senderAddress, items }) {
+export default async function DetailInvoice({ invoice, address, items }) {
 
     // const invoice = await fetchDetails(id);
     // const clientAddress = await fetchClientAddress(invoice[0].invoice_ref);
@@ -82,10 +82,10 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
                         </article>
                         <article className="mt-[30px] md:mt-0 md:text-right">
                             <Suspense fallback="Loading...">
-                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0]?.street}</p>
-                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].city}</p>
-                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].post_code}</p>
-                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{senderAddress[0] && senderAddress[0].country}</p>
+                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.sen_street}</p>
+                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.sen_city}</p>
+                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.sen_post_code}</p>
+                                <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.sen_country}</p>
                             </Suspense>
                         </article>
                     </div>
@@ -107,10 +107,10 @@ export default async function DetailInvoice({ invoice, clientAddress, senderAddr
                                 <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Bill To</p>
                                 <Suspense fallback="Loading...">
                                     <h3 className="text-secondary-black font-bold text-[15px] dark:text-white my-[13px]">{invoice && invoice[0].client_name}</h3>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.street}</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.city}</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.post_code}</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{clientAddress[0]?.country}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.cli_street}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.cli_city}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.cli_post_code}</p>
+                                    <p className="text-secondary-greyish-blue font-medium text-[13px] dark:text-white">{address[0]?.cli_country}</p>
                                 </Suspense>
                             </article>
                         </div>

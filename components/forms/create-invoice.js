@@ -59,7 +59,7 @@ function ItemsForm({ onDelete, index, message }) {
 }
 
 
-export default function Form() {
+export default function Form({ user_id }) {
     function formatDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -75,8 +75,10 @@ export default function Form() {
     const pathname = usePathname()
     const [date, setDate] = useState(formatDate(today))
     const [selectedTerm, setSelectedTerm] = useState(30)
+
+    const handleNewInvoice = createInvoice.bind(null, user_id)
     const initialState = { message: null, errors: [], cln: null };
-    const [state, dispatch] = useFormState(createInvoice, initialState)
+    const [state, dispatch] = useFormState(handleNewInvoice, initialState)
     function handleAddForm() {
         setItemForm([...itemForm, <ItemsForm key={itemForm.length} index={itemForm.length} onDelete={handleDelete} />])
     }

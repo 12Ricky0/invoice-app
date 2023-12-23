@@ -5,7 +5,6 @@ export const ThemeContext = createContext({})
 export default function ThemeProvider({ children }) {
 
     const [theme, setTheme] = useState('light')
-    const [showForm, setShowForm] = useState(false)
 
     useEffect(() => {
         try {
@@ -25,6 +24,6 @@ export default function ThemeProvider({ children }) {
         }
     })
 
-    return <ThemeContext.Provider value={{ setTheme, theme, showForm, setShowForm }}>{children}</ThemeContext.Provider>
+    return <ThemeContext.Provider value={{ setTheme, theme }}>{children}</ThemeContext.Provider>
 
 }

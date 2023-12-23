@@ -1,9 +1,8 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { redirect, useRouter } from "next/navigation";
-import { items } from "./placeholder_data";
+import { redirect } from "next/navigation";
 import validator from "validator";
-import { fetchTotalInvoice, fetchInvoice } from "./data";
+import { insertDefaultInvoice } from "./defaultInvoice";
 const pg = require('pg');
 import { auth } from "@/auth";
 
@@ -11,30 +10,40 @@ const db = new pg.Client({
     user: "postgres",
     host: "localhost",
     database: "Invoice",
-    password: "Suretaste2",
+    password: process.env.PASSWORD,
     port: 5433,
 });
 db.connect();
+
 
 export async function seedUser() {
     const { user } = await auth() || {};
 
     try {
-        await db.query(`
-                INSERT INTO users(name, email)
-                VALUES($1, $2)
-        `,
-            [user?.name, user?.email]
-        )
+        const emailExists = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+        console.log(emailExists.rows)
+        if (emailExists.rows.length > 0) {
+            console.log("Email already exists");
+        } else {
+            const newUser = await db.query(`
+            INSERT INTO users(name, email)
+            VALUES($1, $2)
+            RETURNING user_id
+        `, [user?.name, user?.email]);
+            await insertDefaultInvoice()
 
+        }
     } catch (error) {
-        // console.error(error)
-        // throw new Error('Could not insert user into database')
+        console.error("Error:", error);
     }
-
 }
 
-export default async function createInvoice(prevState, formData) {
+export default async function createInvoice(id, prevState, formData) {
+    const { user } = await auth() || {};
 
     const invoice = {
         clientName: formData.get('cName'),
@@ -44,11 +53,10 @@ export default async function createInvoice(prevState, formData) {
         clientEmail: formData.get('cEmail'),
 
     }
+    console.log(user)
 
-    // Convert invoice.date to a Date object
     const invoiceDate = new Date(invoice.date);
     const paymentTerm = Number(invoice.paymentTerm)
-    // Add 20 days to the invoice date
     const payment_due = new Date(invoiceDate.getTime() + (paymentTerm * 24 * 60 * 60 * 1000));
 
     const billFrom = {
@@ -105,19 +113,23 @@ export default async function createInvoice(prevState, formData) {
         }
     }
 
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
-
     try {
 
-        await db.query(`
-            INSERT INTO invoice (created_at, payment_due, description, payment_terms, client_name, client_email, status)
-            VALUES ($1, $2, $3, $4, $5, $6, $7);
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
+        const data = await db.query(`
+            INSERT INTO invoice (user_id, created_at, payment_due, description, payment_terms, client_name, client_email, status)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING invoice_ref;
         `,
-            [invoice.date, payment_due, invoice.description, invoice.paymentTerm, invoice.clientName, invoice.clientEmail, status]
+            [userId.rows[0].user_id, invoice.date, payment_due, invoice.description, invoice.paymentTerm, invoice.clientName, invoice.clientEmail, status]
         )
 
-        const totalInvoice = await fetchTotalInvoice()
-        const invoice_ref = totalInvoice[totalInvoice.length - 1].invoice_ref
+        const invoice_ref = data.rows[0].invoice_ref
 
 
         for (let i = 0; i < items.itemName.length; i++) {
@@ -127,29 +139,21 @@ export default async function createInvoice(prevState, formData) {
             const total = items.total[i];
 
             await db.query(`
-                INSERT INTO items(invoice_ref, name, quantity, price, total)
-                VALUES($1, $2, $3, $4, $5)
+                INSERT INTO items(user_id, invoice_ref, name, quantity, price, total)
+                VALUES($1, $2, $3, $4, $5, $6)
         `,
-                [invoice_ref, itemName, quantity, price, total]
+                [userId.rows[0].user_id, invoice_ref, itemName, quantity, price, total]
             )
 
         }
 
 
         await db.query(`
-            INSERT INTO client_address(invoice_ref, street, city, post_code, country)
-            VALUES($1, $2, $3, $4, $5);
+            INSERT INTO address(user_id, invoice_ref, sen_street, sen_city, sen_post_code, sen_country, cli_street, cli_city, cli_post_code, cli_country)
+            VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
         `,
-            [invoice_ref, billTo.streetAddress, billTo.city, billTo.postCode, billTo.country]
+            [userId.rows[0].user_id, invoice_ref, billFrom.streetAddress, billFrom.city, billFrom.postCode, billFrom.country, billTo.streetAddress, billTo.city, billTo.postCode, billTo.country]
         );
-
-        await db.query(`
-            INSERT INTO sender_address(invoice_ref, street, city, post_code, country)
-            VALUES($1, $2, $3, $4, $5);
-        `,
-            [invoice_ref, billFrom.streetAddress, billFrom.city, billFrom.postCode, billFrom.country]
-        );
-
 
 
     } catch (error) {
@@ -158,32 +162,24 @@ export default async function createInvoice(prevState, formData) {
     }
 
     revalidatePath('/dashboard');
-    redirect('/dashboard/created');
+    redirect('/dashboard');
 }
 
 export async function deleteInvoice(ref) {
+    const { user } = await auth() || {};
+
 
     try {
-        await db.query(`
-        DELETE FROM items
-        WHERE invoice_ref = $1
-        `, [ref]);
-
-        await db.query(`
-        DELETE FROM client_address
-        WHERE invoice_ref = $1
-        `, [ref]);
-
-        await db.query(`
-        DELETE FROM sender_address
-        WHERE invoice_ref = $1
-        `, [ref]);
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
 
         await db.query(`
         DELETE FROM invoice
-        WHERE invoice_ref = $1
-        `, [ref]);
-
+        WHERE user_id =$1 AND invoice_ref = $2
+        `, [userId.rows[0].user_id, ref]);
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Error deleting invoice")
@@ -195,12 +191,21 @@ export async function deleteInvoice(ref) {
 }
 
 export async function updateInvoice(ref, id) {
+    const { user } = await auth() || {};
+
     try {
+
+        const userId = await db.query(`
+        SELECT user_id
+        FROM users
+        WHERE email = $1
+    `, [user?.email]);
+
         await db.query(`
         UPDATE invoice
         SET status = 'Paid'
-        where invoice_ref = $1
-        `, [ref]);
+        where user_id=$1 AND invoice_ref = $2
+        `, [userId.rows[0].user_id, ref]);
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Error updating invoice")
@@ -302,21 +307,12 @@ export async function updateEditedInvoice(id, prevState, formData) {
         }
 
         await db.query(`
-            UPDATE client_address
-            SET street = $2, city = $3, post_code = $4, country = $5
+            UPDATE address
+            SET cli_street = $2, cli_city = $3, cli_post_code = $4, cli_country = $5, sen_street = $6, sen_city = $7, sen_post_code = $8, sen_country = $9
             where invoice_ref = $1
         `,
-            [id, billTo.streetAddress, billTo.city, billTo.postCode, billTo.country]
+            [id, billTo.streetAddress, billTo.city, billTo.postCode, billTo.country, billFrom.streetAddress, billFrom.city, billFrom.postCode, billFrom.country]
         );
-
-        await db.query(`
-            UPDATE sender_address
-            SET street = $1, city = $2, post_code = $3, country = $4
-            where invoice_ref = $5
-        `,
-            [billFrom.streetAddress, billFrom.city, billFrom.postCode, billFrom.country, id]
-        );
-
 
 
     } catch (error) {
@@ -324,7 +320,6 @@ export async function updateEditedInvoice(id, prevState, formData) {
         throw new Error("Error Updating Invoice")
     }
 
-    // console.log((totalInvoice[totalInvoice.length - 1].invoice_ref) + 1)
 
     revalidatePath('/dashboard');
     redirect('/dashboard',);
