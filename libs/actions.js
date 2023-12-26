@@ -1,6 +1,6 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import validator from "validator";
 import { insertDefaultInvoice } from "./defaultInvoice";
 import { sql } from "@vercel/postgres";
@@ -36,7 +36,6 @@ export async function seedUser() {
 
 export default async function createInvoice(id, prevState, formData) {
     const { user } = await auth() || {};
-
     const invoice = {
         clientName: formData.get('cName'),
         date: formData.get('date'),
@@ -45,7 +44,6 @@ export default async function createInvoice(id, prevState, formData) {
         clientEmail: formData.get('cEmail'),
 
     }
-    console.log(user)
 
     const invoiceDate = new Date(invoice.date);
     const paymentTerm = Number(invoice.paymentTerm)
@@ -73,16 +71,21 @@ export default async function createInvoice(id, prevState, formData) {
         total: formData.getAll('total'),
     }
     if (validator.isEmpty(invoice.clientName)) {
-        return {
+        return ({
             cln: 'can`t be empty',
         }
+            // redirect('/dashboard/create')
+        )
     }
 
     if (items.itemName.length === 0) {
-        return {
+        return ({
             errors: '- An item must be added',
             message: "- All fields must be added"
         }
+            // redirect('/dashboard/create')
+
+        )
     }
 
     for (let i = 0; i < items.itemName.length; i++) {
@@ -91,17 +94,21 @@ export default async function createInvoice(id, prevState, formData) {
         const price = items.price[i];
         const total = items.total[i];
         if (validator.isEmpty(itemName + '') || validator.isEmpty(quantity + '') || validator.isEmpty(price + '')) {
-            return {
+            return ({
                 message: "- All fields must be added"
             }
+                // redirect('/dashboard/create')
+            )
         }
 
         if (quantity < 1 || price < 1) {
-            return {
+            return ({
                 errors: '- Invalid quantity/price',
                 message: "- Enter a valid quantity/price"
             }
+                // redirect('/dashboard/create')
 
+            )
         }
     }
 
@@ -130,6 +137,7 @@ export default async function createInvoice(id, prevState, formData) {
             await sql`
                 INSERT INTO items(user_id, invoice_ref, name, quantity, price, total)
                 VALUES(${userId.rows[0].user_id}, ${invoice_ref}, ${itemName}, ${quantity}, ${price}, ${total})
+                RETURNING id
         `;
 
         }
@@ -141,13 +149,19 @@ export default async function createInvoice(id, prevState, formData) {
                 ${billFrom.country}, ${billTo.streetAddress}, ${billTo.city}, ${billTo.postCode}, ${billTo.country});
         `;
 
+
     } catch (error) {
         console.error("Database Error:", error);
         throw new Error("Error Creating Invoice")
     }
 
-    revalidatePath('/dashboard');
-    redirect('/dashboard');
+    revalidatePath('/dashboard'),
+        redirect('/dashboard')
+
+
+
+
+
 }
 
 export async function deleteInvoice(ref) {
@@ -269,7 +283,7 @@ export async function updateEditedInvoice(id, prevState, formData) {
 
         await sql`
             UPDATE invoice 
-            // SET created_at = ${invoice.date}, payment_due = ${payment_due}, description = ${invoice.description}, payment_terms = ${invoice.paymentTerm}, client_name = ${invoice.clientName}, client_email = ${invoice.clientEmail}
+            SET created_at = ${invoice.date}, payment_due = ${payment_due}, description = ${invoice.description}, payment_terms = ${invoice.paymentTerm}, client_name = ${invoice.clientName}, client_email = ${invoice.clientEmail}
             WHERE invoice_ref = ${id}
         `;
 

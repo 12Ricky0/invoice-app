@@ -2,7 +2,7 @@
 import { useState, useContext, useEffect } from "react";
 import { useFormState } from 'react-dom';
 import Image from "next/image";
-import { Overlay } from "../buttons/buttons";
+import { Overlay, SaveButton } from "../buttons/buttons";
 import CustomSelect from "./select-form";
 import { useRouter, usePathname, redirect } from "next/navigation";
 import { updateEditedInvoice, invoiceUpdate } from "@/libs/actions";
@@ -245,8 +245,7 @@ export default function EditInvoiceForm({ invoice, address, items }) {
                             {/* <input className="h-[48px] block md:hidden w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" /> */}
                             <div className="">
                                 <button onClick={() => router.back()} className="h-[48px] w-[84px] mr-2 rounded-[24px] cursor-pointer font-bold text-[15px] inline-flex justify-center items-center bg-tetiary-light-gray dark:hover:bg-white hover:bg-secondary-light-greyish-blue text-secondary-light-blue dark:bg-white" type="button">Cancel</button>
-
-                                <button className="h-[48px] w-[117px] rounded-[24px] bg-primary-violet dark:text-white hover:bg-secondary-black cursor-pointer text-white font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" type="submit">Save Changes</button>
+                                <SaveButton />
                             </div>
                         </section>
                     </div>

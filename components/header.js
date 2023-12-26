@@ -39,14 +39,15 @@ export default function Header({ dp }) {
                 </div>
                 <div className=" border-r border-r-secondary-light-blue h-[72px] lg:border-r-0 lg:h-0 lg:mx-0 lg:w-[103px] lg:border-b lg:border-b-secondary-light-blue items-center ml-6 lg:mt-6 " />
                 {/* <div className="bg-image-avatar w-[32px] h-[32px] bg-contain rounded-2xl mx-6 lg:my-6 lg:mx-0" /> */}
-                <Image
-                    src={dp}
-                    alt="empty image"
-                    height={200}
-                    width={240}
-                    className="w-[32px] h-[32px] bg-contain rounded-2xl mx-6 lg:my-6 lg:mx-0"
-                />
-
+                <Link href="/">
+                    <Image
+                        src={dp}
+                        alt="empty image"
+                        height={200}
+                        width={240}
+                        className="w-[32px] cursor-pointer h-[32px] bg-contain rounded-2xl mx-6 lg:my-6 lg:mx-0"
+                    />
+                </Link>
             </nav>
         </header>
     )

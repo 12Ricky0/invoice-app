@@ -27,15 +27,16 @@ export default async function Home() {
               <span className=" text-center text-secondary-greyish-blue font-medium text-[13px] dark:text-white">Login by clicking <b>Sign in</b> button and get started </span>
 
             }
+            {user?.email &&
+              <Link href='/dashboard' className=" mt-[42px] block text-center">
+                <button className="h-[48px] w-[149px]  rounded-[24px] bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" type="button">View Invoice</button>
+              </Link>
+            }
+
           </article>
         </div>
       </div>
       <Login user={user} />
-      {user?.email &&
-        <Link href='/dashboard' className=" mt-[42px] block text-center">
-          <button className="h-[48px] w-[149px]  rounded-[24px] bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" type="button">View Invoice</button>
-        </Link>
-      }
     </main>
   )
 }

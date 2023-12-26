@@ -4,20 +4,19 @@ import { useFormState } from 'react-dom';
 import Image from "next/image";
 import { Overlay } from "../buttons/buttons";
 import CustomSelect from "./select-form";
-import { ThemeContext } from "@/theme-provider";
 import { useRouter, usePathname, redirect } from "next/navigation";
 import createInvoice from "@/libs/actions";
-import { SubmitButton } from "../buttons/buttons";
-import { MobileSubmit } from "../buttons/buttons";
+import { SubmitButton, MobileSubmit } from "../buttons/buttons";
 import Link from "next/link";
 
+let total2;
 function ItemsForm({ onDelete, index, message }) {
 
     const [qty, setQty] = useState()
     const [price, setPrice] = useState()
     const [name, setName] = useState()
     let total = Number(qty) * Number(price)
-
+    total2 = total
     const handleDelete = () => {
         onDelete(index);
     };
@@ -34,7 +33,7 @@ function ItemsForm({ onDelete, index, message }) {
                     <input onChange={(e) => { setQty(e.target.value) }} value={qty} placeholder="0" className={` ${qty < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[64px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue`} type="number" name="qty" />
                 </div>
                 <div className="mr-6">
-                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="itmName" >Price</label><br />
+                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="price" >Price</label><br />
                     <input onChange={(e) => { setPrice(e.target.value) }} value={price} className={`${price < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[100px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue"`} type="number" placeholder="0.00" name="price" />
                 </div>
                 <div>
@@ -70,15 +69,14 @@ export default function Form({ user_id }) {
     const today = new Date();
 
     const [itemForm, setItemForm] = useState([])
-    const { showForm, setShowForm } = useContext(ThemeContext)
     const router = useRouter()
     const pathname = usePathname()
     const [date, setDate] = useState(formatDate(today))
     const [selectedTerm, setSelectedTerm] = useState(30)
 
     const handleNewInvoice = createInvoice.bind(null, user_id)
-    const initialState = { message: null, errors: [], cln: null };
-    const [state, dispatch] = useFormState(handleNewInvoice, initialState)
+    // const initialState = { message: null, errors: [], cln: null, info: null };
+    const [state, dispatch] = useFormState(handleNewInvoice, {})
     function handleAddForm() {
         setItemForm([...itemForm, <ItemsForm key={itemForm.length} index={itemForm.length} onDelete={handleDelete} />])
     }
@@ -90,7 +88,6 @@ export default function Form({ user_id }) {
 
         })
     }
-
     useEffect(() => {
         if (pathname === "/dashboard/create") {
             document.body.classList.add('modal-open');
@@ -109,7 +106,6 @@ export default function Form({ user_id }) {
         term === "Net 14 Days" && setSelectedTerm(17);
         term === "Net 30 Days" && setSelectedTerm(30);
     };
-
 
     return (
         <div className="">
@@ -146,7 +142,7 @@ export default function Form({ user_id }) {
                                         <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="city" />
                                     </div>
                                     <div className="md:mr-6">
-                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="postCode" >Post Code</label><br />
+                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="post-code" >Post Code</label><br />
                                         <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="post-code" />
                                     </div>
                                     <div className="hidden md:inline-block">
@@ -173,7 +169,7 @@ export default function Form({ user_id }) {
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cEmail" >Client`s Email</label><br />
                                 <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="email" name="cEmail" placeholder="e.g. email@example.com" />
 
-                                <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cEmail" >Street Address</label><br />
+                                <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cAddress" >Street Address</label><br />
                                 <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cAddress" />
 
                                 <div className="flex justify-between mb-[25px]">
@@ -182,11 +178,11 @@ export default function Form({ user_id }) {
                                         <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cCity" />
                                     </div>
                                     <div className="md:mr-6">
-                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="postCode" >Post Code</label><br />
+                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cPost-code" >Post Code</label><br />
                                         <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cPost-code" />
                                     </div>
                                     <div className="hidden md:inline-block">
-                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
+                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cCountry" >Country</label><br />
                                         <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cCountry" />
                                     </div>
 
@@ -225,11 +221,6 @@ export default function Form({ user_id }) {
                                 }
                             </fieldset>
                             <button onClick={handleAddForm} className="text-secondary-greyish-blue hover:text-secondary-light-blue text-opacity-[1] hover:bg-secondary-light-greyish-blue cursor-pointer font-bold text-[15px] border-none block w-[100%] bg-tetiary-light-gray py-4 rounded-[24px] dark:bg-primary-dark-blue " type="button">+ Add New Item</button>
-                            {/* {state && state.map(error =>
-                                <p aria-live="polite" key={error} className="text-tetiary-red text-[10px] font-semibold mt-[34px]">
-                                    {error}
-                                </p>
-                            )} */}
                             <p aria-live="polite" className="text-tetiary-red text-[10px] font-semibold mt-[34px]">
                                 {state && state.errors}
                             </p>
@@ -239,12 +230,12 @@ export default function Form({ user_id }) {
 
                         </section>
                         <section className="mt-[41px] md:mx-[56px] flex justify-between rounded-br-[20px] items-center h-[91px]">
-                            <button onClick={() => router.back()} className="h-[48px] w-[84px] lg:ml-6 rounded-[24px] cursor-pointer font-bold text-[15px] inline-flex justify-center items-center bg-tetiary-light-gray dark:hover:bg-white hover:bg-secondary-light-greyish-blue text-secondary-light-blue dark:bg-white" type="button">Discard</button>
+                            <button onClick={() => router.back()} className="h-[48px] w-[84px] ml-6 md:ml-0 lg:ml-6 rounded-[24px] cursor-pointer font-bold text-[15px] inline-flex justify-center items-center bg-tetiary-light-gray dark:hover:bg-white hover:bg-secondary-light-greyish-blue text-secondary-light-blue dark:bg-white" type="button">Discard</button>
                             <input className="h-[48px] block md:hidden w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" />
                             <MobileSubmit />
                             <div className="hidden md:inline-flex justify-between">
                                 <input className="h-[48px] w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" />
-                                <SubmitButton />
+                                <SubmitButton value={state?.info} onClick={() => { total2 >= 1 && router.back(); total2 = 0 }} />
                             </div>
                         </section>
                     </div>

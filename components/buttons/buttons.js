@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useFormStatus } from 'react-dom';
 import { deleteInvoice, updateInvoice } from "@/libs/actions";
 import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 
 export function DeleteButton({ id, action, refe }) {
@@ -24,19 +25,29 @@ export function DeleteButton({ id, action, refe }) {
     )
 }
 
-export function SubmitButton({ disabled }) {
-    const { pending } = useFormStatus()
+export function SubmitButton({ onClick, value }) {
+    const { pending, action } = useFormStatus()
     const router = useRouter()
-
     return (
         <div>
-            <button aria-disabled={pending} disabled={disabled} type="submit" className="h-[48px] hidden md:inline-block w-[112px] rounded-[24px] md:ml-2 bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" >{pending ? "Sending..." : "Save & Send"}</button>
+            <button onClick={onClick} aria-disabled={pending} value={value} disabled={pending} type="submit" className="h-[48px] hidden md:inline-block w-[112px] rounded-[24px] md:ml-2 bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" >{pending ? "Sending..." : "Save & Send"}</button>
             {/* <button aria-disabled={pending} onClick={() => console.log(formData.get('paymentTerm'))} className="h-[48px] block md:hidden w-[112px] mr-6 rounded-[24px] bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" type="submit">{pending ? "Sending..." : "Save & Send"}</button> */}
         </div>
     )
 }
+
+export function SaveButton() {
+    const { pending } = useFormStatus()
+    const router = useRouter()
+
+    return <button onClick={() => router.back()} className="h-[48px] w-[117px] rounded-[24px] bg-primary-violet dark:text-white hover:bg-secondary-black cursor-pointer text-white font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" type="submit">{pending ? "Saving..." : "Save Changes"}</button>
+
+}
+
 export function MobileSubmit() {
     const { pending } = useFormStatus()
+    const router = useRouter()
+
 
     return (
         <div>
