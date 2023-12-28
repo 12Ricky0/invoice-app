@@ -1,15 +1,15 @@
 'use client';
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useFormState } from 'react-dom';
 import Image from "next/image";
 import { Overlay, SaveButton } from "../buttons/buttons";
 import CustomSelect from "./select-form";
 import { useRouter, usePathname, redirect } from "next/navigation";
-import { updateEditedInvoice, invoiceUpdate } from "@/libs/actions";
+import { updateEditedInvoice, deleteItem } from "@/libs/actions";
 import Link from "next/link";
 
 
-function ItemsForm({ onDelete, index, t, q, p, n }) {
+function ItemsForm({ onDelete, index, t, q, p, n, id }) {
 
     const [qty, setQty] = useState(q)
     const [price, setPrice] = useState(p)
@@ -17,7 +17,7 @@ function ItemsForm({ onDelete, index, t, q, p, n }) {
     let total = Number(qty) * Number(price)
 
     const handleDelete = () => {
-        onDelete(index);
+        onDelete(index, id);
     };
 
     return (
@@ -63,9 +63,6 @@ export default function EditInvoiceForm({ invoice, address, items }) {
     const createdDate = new Date(invoice[0].created_at);
     const formattedDate = createdDate.toISOString().split('T')[0];
 
-    // function handleEdit(formData) {
-    //     updateEditedInvoice(invoice[0].invoice_ref)
-    // }
 
     const handleEdit = updateEditedInvoice.bind(null, invoice[0].invoice_ref)
 
@@ -73,18 +70,25 @@ export default function EditInvoiceForm({ invoice, address, items }) {
     const router = useRouter()
     const pathname = usePathname()
     const [selectedTerm, setSelectedTerm] = useState(30)
-    const initialState = { message: null, errors: [], cln: null };
-    const [state, dispatch] = useFormState(handleEdit, initialState)
+    // const initialState = { message: null, errors: [], cln: null };
+    const [state, dispatch] = useFormState(handleEdit, {})
     function handleAddForm() {
         setItemForm([...itemForm, <ItemsForm key={itemForm.length} index={itemForm.length} onDelete={handleDelete} />])
     }
-    function handleDelete(key) {
-        setItemForm(prev => {
-            return prev.filter((item, index) => {
-                return key !== index
+    async function handleDelete(key, id) {
+        if (itemForm.length <= 1) {
+            return { errors: 'Item cannot be empty' }
+        }
+        else {
+            await deleteItem(id)
+            setItemForm(prev => {
+                return prev.filter((item, index) => {
+                    return key !== index
+                })
+
             })
 
-        })
+        }
     }
 
     useEffect(() => {
@@ -99,6 +103,7 @@ export default function EditInvoiceForm({ invoice, address, items }) {
                 key={index}
                 index={index}
                 onDelete={handleDelete}
+                id={item.id}
                 n={item.name}
                 p={item.price}
                 q={item.quantity}
@@ -127,20 +132,18 @@ export default function EditInvoiceForm({ invoice, address, items }) {
 
                     <div className="lg:w-[700px] md:w-[670px] md:ml-0 lg:ml-[80px] absolute bg-white overflow-y-auto dark:bg-tetiary-dark-russian md:rounded-r-[20px]">
                         <section className="mx-6 md:mx-[56px] lg:mr-[56px] lg:ml-[70px]">
-                            <Link href="/dashboard" className="block md:hidden">
-                                <div className="w-[87%] mt-[100px] lg:w-[50%] block">
-                                    <Image
-                                        src="/assets/icon-arrow-left.svg"
-                                        alt="arrow right"
-                                        width={5}
-                                        height={10}
-                                        className="inline-block mr-6 w-auto h-auto"
-                                    />
+                            <div onClick={() => router.back()} className="w-[87%] mt-[100px] lg:w-[50%] block lg:hidden">
+                                <Image
+                                    src="/assets/icon-arrow-left.svg"
+                                    alt="arrow right"
+                                    width={5}
+                                    height={10}
+                                    className="inline-block mr-6 w-auto h-auto"
+                                />
 
-                                    <span className="text-secondary-black mb-[31px] font-bold text-center text-[15px] dark:text-white">Go back</span>
+                                <span className="text-secondary-black mb-[31px] font-bold text-center text-[15px] dark:text-white">Go back</span>
 
-                                </div>
-                            </Link>
+                            </div>
 
                             <h1 className="font-bold text-[24px] md:pt-[59px] pt-[26px] pb-[22px] md:pb-[46px] text-secondary-black dark:text-white">Edit #{invoice[0].id.slice(1, 7).toUpperCase()}</h1>
 
@@ -221,13 +224,6 @@ export default function EditInvoiceForm({ invoice, address, items }) {
                                 <input defaultValue={invoice[0].description} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" placeholder="e.g. Graphic Design Service" type="text" name="pjDesc" />
 
                                 <legend className="font-bold mb-6 text-[15px] text-secondary-greyish-blue">Item List</legend>
-                                {/* <div className="hidden md:flex justify-between mb-[15px] mx-6">
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="itmName" >Item Name</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] ml-[130px]" htmlFor="qty" >Qty.</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] mr-[40px] " htmlFor="itmName" >Price</p>
-                                    <p className="text-secondary-greyish-blue font-medium text-[13px] mr-[115px]">Total</p>
-
-                                </div> */}
                                 {
                                     itemForm
                                 }

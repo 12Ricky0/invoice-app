@@ -231,11 +231,11 @@ export default function Form({ user_id }) {
                         </section>
                         <section className="mt-[41px] md:mx-[56px] flex justify-between rounded-br-[20px] items-center h-[91px]">
                             <button onClick={() => router.back()} className="h-[48px] w-[84px] ml-6 md:ml-0 lg:ml-6 rounded-[24px] cursor-pointer font-bold text-[15px] inline-flex justify-center items-center bg-tetiary-light-gray dark:hover:bg-white hover:bg-secondary-light-greyish-blue text-secondary-light-blue dark:bg-white" type="button">Discard</button>
-                            <input className="h-[48px] block md:hidden w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" />
-                            <MobileSubmit />
+                            <input onClick={() => { total2 >= 1 && router.back(); total2 = 0 }} className="h-[48px] block md:hidden w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" />
+                            <MobileSubmit onClick={() => { total2 >= 1 && router.back(); total2 = 0 }} />
                             <div className="hidden md:inline-flex justify-between">
-                                <input className="h-[48px] w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" />
-                                <SubmitButton value={state?.info} onClick={() => { total2 >= 1 && router.back(); total2 = 0 }} />
+                                <input onClick={() => { total2 >= 1 && router.back(); total2 = 0 }} className="h-[48px] w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" />
+                                <SubmitButton onClick={() => { total2 >= 1 && router.back(); total2 = 0 }} />
                             </div>
                         </section>
                     </div>

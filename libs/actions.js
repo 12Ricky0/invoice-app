@@ -1,6 +1,6 @@
 'use server';
 import { revalidatePath } from "next/cache";
-import { redirect, useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import validator from "validator";
 import { insertDefaultInvoice } from "./defaultInvoice";
 import { sql } from "@vercel/postgres";
@@ -74,7 +74,6 @@ export default async function createInvoice(id, prevState, formData) {
         return ({
             cln: 'can`t be empty',
         }
-            // redirect('/dashboard/create')
         )
     }
 
@@ -83,8 +82,6 @@ export default async function createInvoice(id, prevState, formData) {
             errors: '- An item must be added',
             message: "- All fields must be added"
         }
-            // redirect('/dashboard/create')
-
         )
     }
 
@@ -97,7 +94,6 @@ export default async function createInvoice(id, prevState, formData) {
             return ({
                 message: "- All fields must be added"
             }
-                // redirect('/dashboard/create')
             )
         }
 
@@ -106,8 +102,6 @@ export default async function createInvoice(id, prevState, formData) {
                 errors: '- Invalid quantity/price',
                 message: "- Enter a valid quantity/price"
             }
-                // redirect('/dashboard/create')
-
             )
         }
     }
@@ -215,6 +209,8 @@ export async function updateInvoice(ref, id) {
 }
 
 export async function updateEditedInvoice(id, prevState, formData) {
+    const { user } = await auth() || {};
+
     const invoice = {
 
         clientName: formData.get('cName'),
@@ -287,18 +283,41 @@ export async function updateEditedInvoice(id, prevState, formData) {
             WHERE invoice_ref = ${id}
         `;
 
+        const itemId = await sql`
+        SELECT * FROM items 
+        WHERE invoice_ref = ${id}
+        `;
+        // console.log(itemId);
+
+        const userId = await sql`
+        SELECT user_id
+        FROM users
+        WHERE email = ${user?.email}
+    `;
+
 
         for (let i = 0; i < items.itemName.length; i++) {
             const itemName = items.itemName[i];
             const quantity = items.quantity[i];
             const price = items.price[i];
             const total = items.total[i];
+            const item_id = itemId.rows[i].id
+            const existingItem = itemId.rows.find(item => item.name === itemName);
 
+            // if (existingItem === item_id) {
             await sql`
                     UPDATE items
                     SET name = ${itemName}, quantity = ${quantity}, price = ${price}, total = ${total}
-                    where invoice_ref = ${id}
-            `;
+                    where id = ${item_id} AND invoice_ref = ${id}
+            ;`
+
+            // }
+            // else {
+            //     await sql`
+            //             INSERT INTO items (invoice_ref, user_id, name, quantity, price, total)
+            //             VALUES (${id}, ${userId.rows[0].user_id}, ${itemName}, ${quantity}, ${price}, ${total})
+            //         `;
+            // }
         }
 
         await sql`
@@ -317,6 +336,25 @@ export async function updateEditedInvoice(id, prevState, formData) {
 
     revalidatePath('/dashboard');
     redirect('/dashboard',);
+
+}
+
+export async function deleteItem(id) {
+    console.log(id)
+    try {
+
+        await sql`
+        DELETE FROM items
+        where id = ${id} 
+        `;
+
+    } catch (error) {
+        console.error('Error deleting item', error)
+        throw new Error("Error deleting item")
+
+    }
+
+    revalidatePath('/dashboard');
 
 }
 

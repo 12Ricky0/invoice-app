@@ -44,14 +44,14 @@ export function SaveButton() {
 
 }
 
-export function MobileSubmit() {
+export function MobileSubmit({ onClick }) {
     const { pending } = useFormStatus()
     const router = useRouter()
 
 
     return (
         <div>
-            <button aria-disabled={pending} className="h-[48px] block md:hidden w-[112px] mr-6 rounded-[24px] bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" type="submit">{pending ? "Sending..." : "Save & Send"}</button>
+            <button onClick={onClick} aria-disabled={pending} className="h-[48px] block md:hidden w-[112px] mr-6 rounded-[24px] bg-primary-violet hover:bg-primary-light-violet cursor-pointer text-white font-bold text-[15px]" type="submit">{pending ? "Sending..." : "Save & Send"}</button>
         </div>
     )
 }

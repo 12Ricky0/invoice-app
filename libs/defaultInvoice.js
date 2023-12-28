@@ -2,16 +2,6 @@ import { sql } from "@vercel/postgres";
 import { auth } from "@/auth";
 
 
-// const db = new pg.Client({
-//     user: "postgres",
-//     host: "localhost",
-//     database: "Invoice",
-//     password: process.env.PASSWORD,
-//     port: 5433,
-// });
-// db.connect();
-
-
 export async function insertDefaultInvoice(ref) {
     const { user } = await auth() || {};
     try {
