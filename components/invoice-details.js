@@ -7,10 +7,6 @@ import Image from "next/image";
 
 export default async function DetailInvoice({ invoice, address, items }) {
 
-    // const invoice = await fetchDetails(id);
-    // const clientAddress = await fetchClientAddress(invoice[0].invoice_ref);
-    // const senderAddress = await fetchSenderAddress(invoice[0].invoice_ref);
-    // const items = await fetchItems(invoice[0].invoice_ref);
 
     function dueDate(date) {
         const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -55,7 +51,10 @@ export default async function DetailInvoice({ invoice, address, items }) {
                     <div className="mr-6 flex">
                         <EditButton id={invoice && invoice[0].id} />
                         <DeleteButton refe={invoice && invoice[0].invoice_ref} id={invoice && invoice[0].id.slice(1, 7).toUpperCase()} />
-                        <MarkButton id={invoice && invoice[0].id} refe={invoice && invoice[0].invoice_ref} />
+                        {(invoice[0]?.status == 'Pending' || invoice[0]?.status == 'Draft') && (
+                            <MarkButton id={invoice && invoice[0].id} refe={invoice && invoice[0].invoice_ref} />
+                        )
+                        }
                     </div>
                 </div>
                 {/* Desktop Design */}

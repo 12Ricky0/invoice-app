@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 
 const CustomSelect = ({ onChange, term }) => {
@@ -45,7 +45,7 @@ const CustomSelect = ({ onChange, term }) => {
                 width={9}
                 height={4.5}
                 onClick={toggleOptions}
-                className={`cursor-pointer ${showOptions && 'rotate-180'}`}
+                className={`cursor-pointer w-auto ${showOptions && 'rotate-180'}`}
             />
 
         </div>

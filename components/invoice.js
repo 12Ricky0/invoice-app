@@ -32,7 +32,7 @@ export default async function Invoice({ query }) {
                         alt="empty image"
                         height={200}
                         width={240}
-                        className=""
+                        className=" w-auto"
                     />
                     <article className="mt-[42px] text-center">
                         <h1 className="text-secondary-black mb-[23px] font-bold text-[24px] dark:text-white">There is nothing here</h1>
@@ -90,7 +90,7 @@ export default async function Invoice({ query }) {
                                 alt="arrow right"
                                 width={5}
                                 height={10}
-                                className="mr-6"
+                                className="mr-6 w-auto"
                             />
                         </div>
                     </section>

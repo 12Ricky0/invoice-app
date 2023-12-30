@@ -13,9 +13,6 @@ export default function Header({ dp }) {
     }
 
     function handleClick() {
-        // setTheme(() => {
-        //     ;
-        // })
         setTheme(theme === 'light' ? 'dark' : 'light')
         localStorage.setItem('theme', theme)
     }
@@ -35,6 +32,7 @@ export default function Header({ dp }) {
                         width={20}
                         height={20}
                         onClick={handleClick}
+                        className="w-auto"
                     />
                 </div>
                 <div className=" border-r border-r-secondary-light-blue h-[72px] lg:border-r-0 lg:h-0 lg:mx-0 lg:w-[103px] lg:border-b lg:border-b-secondary-light-blue items-center ml-6 lg:mt-6 " />

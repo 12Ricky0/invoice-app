@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useFormStatus } from 'react-dom';
 import { deleteInvoice, updateInvoice } from "@/libs/actions";
 import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
 
 
 export function DeleteButton({ id, action, refe }) {

@@ -49,7 +49,7 @@ function FilterCard({ query }) {
                 alt="arrow down"
                 width={9}
                 height={5}
-                className={`inline-block cursor-pointer ${showFilter && 'rotate-180'}`}
+                className={`inline-block w-auto cursor-pointer ${showFilter && 'rotate-180'}`}
             />
 
         </div>
@@ -81,7 +81,7 @@ export default function Title({ total, mtotal }) {
                             alt="icon plus"
                             width={9}
                             height={5}
-                            className="inline-block"
+                            className="inline-block w-auto"
                         />
                     </div>
                     <p className=" font-bold text-[15px] text-white pr-3 inline-block md:hidden">New</p>

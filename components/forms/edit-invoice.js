@@ -4,9 +4,8 @@ import { useFormState } from 'react-dom';
 import Image from "next/image";
 import { Overlay, SaveButton } from "../buttons/buttons";
 import CustomSelect from "./select-form";
-import { useRouter, usePathname, redirect } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { updateEditedInvoice, deleteItem } from "@/libs/actions";
-import Link from "next/link";
 
 
 function ItemsForm({ onDelete, index, t, q, p, n, id }) {
@@ -25,16 +24,17 @@ function ItemsForm({ onDelete, index, t, q, p, n, id }) {
 
             <div className="md:mr-6">
                 <label className="text-secondary-greyish-blue font-medium text-[13px] " htmlFor="itmName" >Item Name</label><br />
-                <input onChange={(e) => { setName(e.target.value) }} value={name} className={`${name ? 'border-secondary-light-greyish-blue' : 'border-tetiary-red'} pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] md:w-[214px] mt-[9px] mb-[25px] border rounded-[4px]  dark:text-white dark:bg-primary-dark-blue`} type="text" name="itmName" />
+                <input onChange={(e) => { setName(e.target.value) }} defaultValue={name} className={`${name ? 'border-secondary-light-greyish-blue' : 'border-tetiary-red'} pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] md:w-[214px] mt-[9px] mb-[25px] border rounded-[4px]  dark:text-white dark:bg-primary-dark-blue`} type="text" id="itmName" name="itmName" />
+                <input defaultValue={id} type="hidden" name="itmId" />
             </div>
             <div className="inline-flex items-center justify-between">
                 <div className="mr-6">
                     <label className="text-secondary-greyish-blue font-medium text-[13px] " htmlFor="qty" >Qty.</label><br />
-                    <input onChange={(e) => { setQty(e.target.value) }} value={qty} placeholder="0" className={` ${qty < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[64px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue`} type="number" name="qty" />
+                    <input onChange={(e) => { setQty(e.target.value) }} defaultValue={qty} placeholder="0" className={` ${qty < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[64px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue`} type="number" id="qty" name="qty" />
                 </div>
                 <div className="mr-6">
-                    <label className="text-secondary-greyish-blue font-medium text-[13px] " htmlFor="itmName" >Price</label><br />
-                    <input onChange={(e) => { setPrice(e.target.value) }} value={price} className={`${price < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[100px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue"`} type="number" placeholder="0.00" name="price" />
+                    <label className="text-secondary-greyish-blue font-medium text-[13px] " htmlFor="price" >Price</label><br />
+                    <input onChange={(e) => { setPrice(e.target.value) }} defaultValue={price} className={`${price < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[100px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue"`} type="number" placeholder="0.00" id="price" name="price" />
                 </div>
                 <div>
                     <span className="text-secondary-greyish-blue font-medium text-[13px] ">Total</span><br />
@@ -62,6 +62,8 @@ export default function EditInvoiceForm({ invoice, address, items }) {
 
     const createdDate = new Date(invoice[0].created_at);
     const formattedDate = createdDate.toISOString().split('T')[0];
+    const pathId = invoice[0].id
+    const ref = invoice[0].invoice_ref
 
 
     const handleEdit = updateEditedInvoice.bind(null, invoice[0].invoice_ref)
@@ -70,25 +72,9 @@ export default function EditInvoiceForm({ invoice, address, items }) {
     const router = useRouter()
     const pathname = usePathname()
     const [selectedTerm, setSelectedTerm] = useState(30)
-    // const initialState = { message: null, errors: [], cln: null };
     const [state, dispatch] = useFormState(handleEdit, {})
     function handleAddForm() {
         setItemForm([...itemForm, <ItemsForm key={itemForm.length} index={itemForm.length} onDelete={handleDelete} />])
-    }
-    async function handleDelete(key, id) {
-        if (itemForm.length <= 1) {
-            return { errors: 'Item cannot be empty' }
-        }
-        else {
-            await deleteItem(id)
-            setItemForm(prev => {
-                return prev.filter((item, index) => {
-                    return key !== index
-                })
-
-            })
-
-        }
     }
 
     useEffect(() => {
@@ -110,12 +96,29 @@ export default function EditInvoiceForm({ invoice, address, items }) {
                 t={item.total}
             />)
         newItem && setItemForm(newItem)
+
         return () => {
             document.body.classList.remove('modal-open');
         };
 
-    }, [items, pathname]);
+    }, []);
 
+    async function handleDelete(key, id) {
+        const e = await deleteItem(id, ref, pathId)
+        if (e[0].count == 1) {
+            return
+        }
+        else {
+            setItemForm(prev => {
+                return prev.filter((item, index) => {
+                    return key !== index
+                })
+
+            })
+
+        }
+
+    }
 
     const handleChange = (term) => {
         term === "Net 1 Day" && setSelectedTerm(1);
@@ -151,32 +154,32 @@ export default function EditInvoiceForm({ invoice, address, items }) {
                                 <legend className="font-bold text-[15px] mb-6 text-primary-violet">Bill From</legend>
 
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="strAdr" >Street Address</label><br />
-                                <input defaultValue={address[0].sen_street} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="strAdr" />
+                                <input defaultValue={address[0].sen_street} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="strAdr" name="strAdr" />
 
                                 <div className="flex justify-between mb-[25px]">
                                     <div className="mr-[23px] md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="city" >City</label><br />
-                                        <input defaultValue={address[0].sen_city} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="city" />
+                                        <input defaultValue={address[0].sen_city} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="city" name="city" />
                                     </div>
                                     <div className="md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="postCode" >Post Code</label><br />
-                                        <input defaultValue={address[0].sen_post_code} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="post-code" />
+                                        <input defaultValue={address[0].sen_post_code} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" id="postCode" type="text" name="post-code" />
                                     </div>
                                     <div className="hidden md:inline-block">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                        <input defaultValue={address[0].sen_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="country" />
+                                        <input defaultValue={address[0].sen_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="country" name="country" />
                                     </div>
                                 </div>
                                 <div className="block md:hidden">
-                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                    <input defaultValue={address[0].sen_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="country" />
+                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="mcountry" >Country</label><br />
+                                    <input defaultValue={address[0].sen_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="mcountry" name="country" />
                                 </div>
                             </fieldset>
 
                             <fieldset className="">
                                 <legend className="font-bold mb-6 text-[15px] text-primary-violet">Bill To</legend>
                                 <div className="flex justify-between">
-                                    <label className={`${state.cln == null ? 'text-secondary-greyish-blue' : 'text-tetiary-red'} text-secondary-greyish-blue font-medium text-[13px]`} htmlFor="cName">Client`s Name</label>
+                                    <span className={`${state.cln == null ? 'text-secondary-greyish-blue' : 'text-tetiary-red'} text-secondary-greyish-blue font-medium text-[13px]`} htmlFor="cName">Client`s Name</span>
                                     <p aria-live="polite" className="text-tetiary-red text-[10px] font-semibold">
                                         {state && state.cln}
                                     </p>
@@ -184,44 +187,44 @@ export default function EditInvoiceForm({ invoice, address, items }) {
                                 <input defaultValue={invoice[0].client_name} className={`pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white  ${state.cln == null ? 'border-secondary-light-greyish-blue' : 'border-tetiary-red'}`} type="text" name="cName" />
 
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cEmail" >Client`s Email</label><br />
-                                <input defaultValue={invoice[0].client_email} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="email" name="cEmail" placeholder="e.g. email@example.com" />
+                                <input defaultValue={invoice[0].client_email} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="email" id="cEmail" name="cEmail" placeholder="e.g. email@example.com" />
 
-                                <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cEmail" >Street Address</label><br />
-                                <input defaultValue={address[0].cli_street} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cAddress" />
+                                <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cAddress" >Street Address</label><br />
+                                <input defaultValue={address[0].cli_street} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" id="cAddress" type="text" name="cAddress" />
 
                                 <div className="flex justify-between mb-[25px]">
                                     <div className="mr-[23px] md:mr-6">
-                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="city" >City</label><br />
-                                        <input defaultValue={address[0].cli_city} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cCity" />
+                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="ccity" >City</label><br />
+                                        <input defaultValue={address[0].cli_city} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="ccity" name="cCity" />
                                     </div>
                                     <div className="md:mr-6">
-                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="postCode" >Post Code</label><br />
-                                        <input defaultValue={address[0].cli_post_code} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cPost-code" />
+                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cpostCode" >Post Code</label><br />
+                                        <input defaultValue={address[0].cli_post_code} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="cpostCode" name="cPost-code" />
                                     </div>
                                     <div className="hidden md:inline-block">
-                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                        <input defaultValue={address[0].cli_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cCountry" />
+                                        <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="mobcountry" >Country</label><br />
+                                        <input defaultValue={address[0].cli_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="mobcountry" name="cCountry" />
                                     </div>
 
                                 </div>
 
                                 <div className="block md:hidden">
-                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                    <input defaultValue={address[0].cli_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="country" />
+                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="mbcountry" >Country</label><br />
+                                    <input defaultValue={address[0].cli_country} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="mbcountry" name="country" />
                                 </div>
                                 <div className="md:flex justify-between">
                                     <div className="md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="date" >Invoice Date</label><br />
-                                        <input defaultValue={formattedDate} className={`pl-5 font-bold text-[15px] text-secondary-black h-[48px] px-4 w-[100%] md:w-[240px]  mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue`} type="date" name="date" />
+                                        <input defaultValue={formattedDate} className={`pl-5 font-bold text-[15px] text-secondary-black h-[48px] px-4 w-[100%] md:w-[240px]  mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue`} type="date" id="date" name="date" />
                                     </div>
                                     <div className="">
-                                        <label className="text-secondary-greyish-blue dark:text-white font-medium text-[13px]" htmlFor="dueDate">Payment Terms</label><br />
+                                        <span className="text-secondary-greyish-blue dark:text-white font-medium text-[13px]" htmlFor="dueDate">Payment Terms</span><br />
                                         <input name="paymentTerm" defaultValue={selectedTerm} className="w-0 h-0 opacity-0" type="hidden" />
                                         <CustomSelect term={invoice[0].payment_terms} onChange={handleChange} />
                                     </div>
                                 </div>
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="pjDesc" >Project Description</label><br />
-                                <input defaultValue={invoice[0].description} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" placeholder="e.g. Graphic Design Service" type="text" name="pjDesc" />
+                                <input defaultValue={invoice[0].description} className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" placeholder="e.g. Graphic Design Service" type="text" id="pjDesc" name="pjDesc" />
 
                                 <legend className="font-bold mb-6 text-[15px] text-secondary-greyish-blue">Item List</legend>
                                 {
@@ -238,7 +241,6 @@ export default function EditInvoiceForm({ invoice, address, items }) {
 
                         </section>
                         <section className="mt-[41px] md:mx-[56px] flex justify-end rounded-br-[20px] items-center h-[91px] mx-6">
-                            {/* <input className="h-[48px] block md:hidden w-[117px] rounded-[24px] bg-primary-gray dark:text-white hover:bg-secondary-black cursor-pointer text-secondary-greyish-blue font-bold dark:hover:bg-primary-very-dark-blue text-[15px]" value="Save as Draft" name="saveDraft" type="submit" /> */}
                             <div className="">
                                 <button onClick={() => router.back()} className="h-[48px] w-[84px] mr-2 rounded-[24px] cursor-pointer font-bold text-[15px] inline-flex justify-center items-center bg-tetiary-light-gray dark:hover:bg-white hover:bg-secondary-light-greyish-blue text-secondary-light-blue dark:bg-white" type="button">Cancel</button>
                                 <SaveButton />

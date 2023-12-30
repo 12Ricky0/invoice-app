@@ -5,6 +5,7 @@ import validator from "validator";
 import { insertDefaultInvoice } from "./defaultInvoice";
 import { sql } from "@vercel/postgres";
 import { auth } from "@/auth";
+import { unstable_noStore as noStore } from "next/cache";
 
 
 export async function seedUser() {
@@ -152,11 +153,9 @@ export default async function createInvoice(id, prevState, formData) {
     revalidatePath('/dashboard'),
         redirect('/dashboard')
 
-
-
-
-
 }
+
+
 
 export async function deleteInvoice(ref) {
     const { user } = await auth() || {};
@@ -208,9 +207,9 @@ export async function updateInvoice(ref, id) {
 
 }
 
-export async function updateEditedInvoice(id, prevState, formData) {
+export async function updateEditedInvoice(id, prevState, formData, pathId) {
     const { user } = await auth() || {};
-
+    console.log(pathId)
     const invoice = {
 
         clientName: formData.get('cName'),
@@ -243,6 +242,7 @@ export async function updateEditedInvoice(id, prevState, formData) {
         quantity: formData.getAll('qty'),
         price: formData.getAll('price'),
         total: formData.getAll('total'),
+        itmId: formData.getAll('itmId'),
     }
     if (validator.isEmpty(invoice.clientName)) {
         return {
@@ -287,7 +287,6 @@ export async function updateEditedInvoice(id, prevState, formData) {
         SELECT * FROM items 
         WHERE invoice_ref = ${id}
         `;
-        // console.log(itemId);
 
         const userId = await sql`
         SELECT user_id
@@ -301,23 +300,23 @@ export async function updateEditedInvoice(id, prevState, formData) {
             const quantity = items.quantity[i];
             const price = items.price[i];
             const total = items.total[i];
-            const item_id = itemId.rows[i].id
-            const existingItem = itemId.rows.find(item => item.name === itemName);
-
-            // if (existingItem === item_id) {
-            await sql`
+            const itmId = items.itmId[i];
+            const item_id = itemId.rows[i]?.id
+            const existingItem = itemId.rows.find(item => item.id == itmId);
+            if (existingItem) {
+                await sql`
                     UPDATE items
                     SET name = ${itemName}, quantity = ${quantity}, price = ${price}, total = ${total}
                     where id = ${item_id} AND invoice_ref = ${id}
-            ;`
+            ;`;
 
-            // }
-            // else {
-            //     await sql`
-            //             INSERT INTO items (invoice_ref, user_id, name, quantity, price, total)
-            //             VALUES (${id}, ${userId.rows[0].user_id}, ${itemName}, ${quantity}, ${price}, ${total})
-            //         `;
-            // }
+            }
+            else {
+                await sql`
+                        INSERT INTO items (invoice_ref, user_id, name, quantity, price, total)
+                        VALUES (${id}, ${userId.rows[0].user_id}, ${itemName}, ${quantity}, ${price}, ${total})
+                    `;
+            }
         }
 
         await sql`
@@ -334,27 +333,51 @@ export async function updateEditedInvoice(id, prevState, formData) {
     }
 
 
-    revalidatePath('/dashboard');
+    revalidatePath(`/dashboard/edit/${pathId}`);
     redirect('/dashboard',);
 
 }
 
-export async function deleteItem(id) {
-    console.log(id)
-    try {
+async function itemCount(ref) {
+    noStore();
 
-        await sql`
+    try {
+        const count = await sql`
+        SELECT COUNT(*) FROM items 
+        WHERE invoice_ref =${ref} 
+        `
+        return count.rows
+    } catch (error) {
+        console.error('Error counting item', error)
+
+    }
+}
+
+
+
+export async function deleteItem(id, ref, pathId) {
+    const count = await itemCount(ref)
+    noStore();
+
+    try {
+        if (count[0].count <= 1) {
+            return count
+
+        } else {
+            await sql`
         DELETE FROM items
         where id = ${id} 
         `;
-
+        }
     } catch (error) {
         console.error('Error deleting item', error)
         throw new Error("Error deleting item")
 
     }
 
-    revalidatePath('/dashboard');
+    revalidatePath(`/dashboard/edit/${pathId}`);
+    revalidatePath(`/dashboard`);
+    return count
 
 }
 

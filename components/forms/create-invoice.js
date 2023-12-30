@@ -1,10 +1,10 @@
 'use client';
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useFormState } from 'react-dom';
 import Image from "next/image";
 import { Overlay } from "../buttons/buttons";
 import CustomSelect from "./select-form";
-import { useRouter, usePathname, redirect } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import createInvoice from "@/libs/actions";
 import { SubmitButton, MobileSubmit } from "../buttons/buttons";
 import Link from "next/link";
@@ -25,16 +25,16 @@ function ItemsForm({ onDelete, index, message }) {
         <div className="md:flex ">
             <div className="md:mr-6">
                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="itmName" >Item Name</label><br />
-                <input onChange={(e) => { setName(e.target.value) }} value={name} className={`${name ? 'border-secondary-light-greyish-blue' : 'border-tetiary-red'} pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] md:w-[214px] mt-[9px] mb-[25px] border rounded-[4px]  dark:text-white dark:bg-primary-dark-blue`} type="text" name="itmName" />
+                <input onChange={(e) => { setName(e.target.value) }} defaultValue={name} className={`${name ? 'border-secondary-light-greyish-blue' : 'border-tetiary-red'} pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] md:w-[214px] mt-[9px] mb-[25px] border rounded-[4px]  dark:text-white dark:bg-primary-dark-blue`} type="text" id="itmName" name="itmName" />
             </div>
             <div className="inline-flex justify-between items-center">
                 <div className="mr-6">
                     <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="qty" >Qty.</label><br />
-                    <input onChange={(e) => { setQty(e.target.value) }} value={qty} placeholder="0" className={` ${qty < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[64px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue`} type="number" name="qty" />
+                    <input onChange={(e) => { setQty(e.target.value) }} defaultValue={qty} placeholder="0" className={` ${qty < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[64px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue`} id="qty" type="number" name="qty" />
                 </div>
                 <div className="mr-6">
                     <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="price" >Price</label><br />
-                    <input onChange={(e) => { setPrice(e.target.value) }} value={price} className={`${price < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[100px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue"`} type="number" placeholder="0.00" name="price" />
+                    <input onChange={(e) => { setPrice(e.target.value) }} defaultValue={price} className={`${price < 1 && "border-tetiary-red outline-tetiary-red"} pl-5 font-bold text-[15px] text-secondary-black dark:text-white h-[48px] w-[100px] mt-[9px] mb-[25px] border rounded-[4px] dark:bg-primary-dark-blue border-secondary-light-greyish-blue"`} id="price" type="number" placeholder="0.00" name="price" />
                 </div>
                 <div>
                     <span className="text-secondary-greyish-blue font-medium text-[13px]">Total</span><br />
@@ -75,7 +75,6 @@ export default function Form({ user_id }) {
     const [selectedTerm, setSelectedTerm] = useState(30)
 
     const handleNewInvoice = createInvoice.bind(null, user_id)
-    // const initialState = { message: null, errors: [], cln: null, info: null };
     const [state, dispatch] = useFormState(handleNewInvoice, {})
     function handleAddForm() {
         setItemForm([...itemForm, <ItemsForm key={itemForm.length} index={itemForm.length} onDelete={handleDelete} />])
@@ -118,7 +117,7 @@ export default function Form({ user_id }) {
                                 <div className="w-[87%] mt-[100px] lg:w-[50%] block">
                                     <Image
                                         src="/assets/icon-arrow-left.svg"
-                                        alt="arrow right"
+                                        alt="arrow-left"
                                         width={5}
                                         height={10}
                                         className="inline-block mr-6 w-auto h-auto"
@@ -134,32 +133,32 @@ export default function Form({ user_id }) {
                                 <legend className="font-bold text-[15px] mb-6 text-primary-violet">Bill From</legend>
 
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="strAdr" >Street Address</label><br />
-                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="strAdr" />
+                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="strAdr" name="strAdr" />
 
                                 <div className="flex justify-between mb-[25px]">
                                     <div className="mr-[23px] md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="city" >City</label><br />
-                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="city" />
+                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="city" name="city" />
                                     </div>
                                     <div className="md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="post-code" >Post Code</label><br />
-                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="post-code" />
+                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="post-code" name="post-code" />
                                     </div>
                                     <div className="hidden md:inline-block">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="country" />
+                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="country" name="country" />
                                     </div>
                                 </div>
                                 <div className="block md:hidden">
-                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                    <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="country" />
+                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="mobcountry" >Country</label><br />
+                                    <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="mobcountry" name="country" />
                                 </div>
                             </fieldset>
 
                             <fieldset>
                                 <legend className="font-bold mb-6 text-[15px] text-primary-violet">Bill To</legend>
                                 <div className="flex justify-between">
-                                    <label className={`${state && state.cln == null ? 'text-secondary-greyish-blue' : 'text-tetiary-red'} text-secondary-greyish-blue font-medium text-[13px]`} htmlFor="cName">Client`s Name</label>
+                                    <span className={`${state && state.cln == null ? 'text-secondary-greyish-blue' : 'text-tetiary-red'} text-secondary-greyish-blue font-medium text-[13px]`} htmlFor="cName">Client`s Name</span>
                                     <p aria-live="polite" className="text-tetiary-red text-[10px] font-semibold">
                                         {state && state.cln}
                                     </p>
@@ -167,44 +166,44 @@ export default function Form({ user_id }) {
                                 <input className={`pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white  ${state.cln == null ? 'border-secondary-light-greyish-blue' : 'border-tetiary-red'}`} type="text" name="cName" />
 
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cEmail" >Client`s Email</label><br />
-                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="email" name="cEmail" placeholder="e.g. email@example.com" />
+                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="email" id="cEmail" name="cEmail" placeholder="e.g. email@example.com" />
 
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cAddress" >Street Address</label><br />
-                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cAddress" />
+                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="cAddress" name="cAddress" />
 
                                 <div className="flex justify-between mb-[25px]">
                                     <div className="mr-[23px] md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="city" >City</label><br />
-                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cCity" />
+                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="cCity" name="cCity" />
                                     </div>
                                     <div className="md:mr-6">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cPost-code" >Post Code</label><br />
-                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cPost-code" />
+                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] border mt-[9px] rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="cPost-code" name="cPost-code" />
                                     </div>
                                     <div className="hidden md:inline-block">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="cCountry" >Country</label><br />
-                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="cCountry" />
+                                        <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="cCountry" name="cCountry" />
                                     </div>
 
                                 </div>
 
                                 <div className="block md:hidden">
-                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="country" >Country</label><br />
-                                    <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" name="country" />
+                                    <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="mcountry" >Country</label><br />
+                                    <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" type="text" id="mcountry" name="country" />
                                 </div>
                                 <div className="md:flex justify-between">
                                     <div className="md:mr-">
                                         <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="date" >Invoice Date</label><br />
-                                        <input value={date} onChange={(e) => { setDate(e.target.value) }} className={`pl-5 font-bold text-[15px] text-secondary-black h-[48px] px-4 w-[100%] md:w-[240px]  mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue`} type="date" name="date" />
+                                        <input value={date} onChange={(e) => { setDate(e.target.value) }} className={`pl-5 font-bold text-[15px] text-secondary-black h-[48px] px-4 w-[100%] md:w-[240px]  mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue`} type="date" id="date" name="date" />
                                     </div>
                                     <div className="">
-                                        <label className="text-secondary-greyish-blue dark:text-white font-medium text-[13px]" htmlFor="dueDate">Payment Terms</label><br />
+                                        <span className="text-secondary-greyish-blue dark:text-white font-medium text-[13px]" >Payment Terms</span><br />
                                         <input name="paymentTerm" defaultValue={selectedTerm} className="w-0 h-0 opacity-0" type="hidden" />
                                         <CustomSelect onChange={handleChange} />
                                     </div>
                                 </div>
                                 <label className="text-secondary-greyish-blue font-medium text-[13px]" htmlFor="pjDesc" >Project Description</label><br />
-                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" placeholder="e.g. Graphic Design Service" type="text" name="pjDesc" />
+                                <input className="pl-5 font-bold text-[15px] text-secondary-black h-[48px] w-[100%] mt-[9px] mb-[25px] border rounded-[4px] dark:border-none dark:bg-primary-dark-blue dark:text-white border-secondary-light-greyish-blue" placeholder="e.g. Graphic Design Service" type="text" id="pjDesc" name="pjDesc" />
 
                                 <legend className="font-bold mb-6 text-[15px] text-secondary-greyish-blue">Item List</legend>
                                 {itemForm.length > 0 ? itemForm :
