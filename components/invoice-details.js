@@ -1,5 +1,4 @@
 import { Buttons, DeleteButton, MarkButton, EditButton } from "./buttons/buttons";
-import { fetchDetails, fetchClientAddress, fetchSenderAddress, fetchItems } from "@/libs/data";
 import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
