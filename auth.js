@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google"
 
 export const config = {
     theme: {
-        logo: "public/assets/logo.svg",
+        logo: "https://next-auth.js.org/img/logo/logo-sm.png",
     },
     providers: [
         GitHub
